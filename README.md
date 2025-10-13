@@ -25,8 +25,6 @@ This repository implements a **trainable clustering framework** that unifies fou
 The framework couples **autoencoder-driven feature learning** with an **MClust-based clustering layer**, enabling **joint optimization of latent representations and cluster assignments** via a trainable loss function.
 
 
-![Descriptive alt text](figures/FACT_Methodology.png "Overall Architecture of ACT (A) Initially, Gene count data with associated spatial coordinates are retrieved. A random subset of spatial spots is iteratively sampled, and genes consistently exhibiting high expression across iterations are identified and removed. The resulting filtered and normalized gene count matrix is used to construct a spatial feature map representation for further analysis. (B) An autoencoder is trained by minimizing the reconstruction error between the input and the reconstructed expression profile. (C) A neural network (clustering layer) assigns labels to the latent representation. (D) Using mclust, class labels are assigned to latent representation (an alternative labelling to (C)). Which are then refined using spatial location information. The KL-divergence between the assigned labels and the clustering layer labelling is computed. This divergence is then used to further train the autoencoder along with the clustering layer, enhancing the quality of the final feature representations. (E) Finally, the Mclust algorithm is applied on the learned feature representations to identify distinct spatial domains.")
-
 
 ---
 
@@ -62,7 +60,7 @@ The workflow consists of five core stages:
 4. **Clustering Layer** – Integrate **MClust** and neural clustering; optimize using **KL-divergence loss**.  
 5. **Spatial Refinement** – Smooth cluster labels using neighboring spatial consistency.  
 
-![Framework Diagram](./docs/architecture.png)
+![Descriptive alt text](figures/FACT_Methodology.png "Overall Architecture of ACT (A) Initially, Gene count data with associated spatial coordinates are retrieved. A random subset of spatial spots is iteratively sampled, and genes consistently exhibiting high expression across iterations are identified and removed. The resulting filtered and normalized gene count matrix is used to construct a spatial feature map representation for further analysis. (B) An autoencoder is trained by minimizing the reconstruction error between the input and the reconstructed expression profile. (C) A neural network (clustering layer) assigns labels to the latent representation. (D) Using mclust, class labels are assigned to latent representation (an alternative labelling to (C)). Which are then refined using spatial location information. The KL-divergence between the assigned labels and the clustering layer labelling is computed. This divergence is then used to further train the autoencoder along with the clustering layer, enhancing the quality of the final feature representations. (E) Finally, the Mclust algorithm is applied on the learned feature representations to identify distinct spatial domains.")
 
 ---
 
