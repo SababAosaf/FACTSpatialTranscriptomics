@@ -36,6 +36,8 @@ This repository implements a **trainable clustering framework** that unifies fou
 The framework couples **autoencoder-driven feature learning** with an **MClust-based clustering layer**, enabling **joint optimization of latent representations and cluster assignments** via a trainable loss function.
 
 
+![Descriptive alt text](figures/FACT_Methodology.png "Image title")
+
 
 ---
 
