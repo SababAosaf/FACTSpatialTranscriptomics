@@ -1,16 +1,5 @@
-# 🧠 Trainable Clustering Framework for Spatial Transcriptomics
+#  Trainable Clustering Framework for Spatial Transcriptomics
 
-**Authors:**  
-Riasat Azim¹*, Sabab Aosaf², Swakkhar Shatabda³, Mohammad Sohel Rahman², and Salekul Islam⁴  
-¹ United International University • ² Bangladesh University of Engineering and Technology (BUET)  
-³ BRAC University • ⁴ North South University  
-
-📄 Published in *Bioinformatics Advances (Oxford)*, 2025  
-📑 Manuscript ID: BIOADV-2025-460  
-🔗 [Paper DOI (coming soon)](https://doi.org/)  
-💻 [GitHub Repository](https://github.com/SababAosaf/FACTSpatialTranscriptomics)
-
----
 
 ## 🧩 Overview
 
@@ -43,11 +32,11 @@ The framework couples **autoencoder-driven feature learning** with an **MClust-b
 
 ## 🚀 Key Features
 
-- 🧬 Supports **gene expression**, **spatial coordinates**, and **image-derived H&E features**.  
-- 🤖 Integrates **autoencoder + MClust** for trainable clustering.  
-- 📊 Implements **metaheuristic refinement** (hill-climbing, ASW-based).  
-- 🧱 Ensemble mechanism automatically selects the best model by **average silhouette width (ASW)**.  
-- 📈 Achieves superior accuracy across multiple benchmark datasets.
+-  Supports **gene expression**, **spatial coordinates**, and **image-derived H&E features**.  
+-  Integrates **autoencoder + MClust** for trainable clustering.  
+-  Implements **metaheuristic refinement** (hill-climbing, ASW-based).  
+-  Ensemble mechanism automatically selects the best model by **average silhouette width (ASW)**.  
+-  Achieves superior accuracy across multiple benchmark datasets.
 
 ---
 
@@ -96,32 +85,26 @@ Additional metrics used:
 
 ## ⚙️ Installation
 
+1. The project requires NVIDIA GPU. Install Driver Version: 581.42, CUDA Version: 13.0 and Cudnn.
+2. Intall R (4.3.2)
+3. Install Anaconda (Python version 3.11)
+4. Create a virtual environment in Anaconda for this project.
+5. Clone this repository.
 ```bash
-# Clone this repository
 git clone https://github.com/SababAosaf/FACTSpatialTranscriptomics.git
 cd FACTSpatialTranscriptomics
-
-# Create environment
-python -m venv stenv
-source stenv/bin/activate  # (or stenv\Scripts\activate on Windows)
-
-# Install dependencies
-pip install -r requirements.txt
 ```
+6. Open the FACTSpatialTranscriptomics project in an IDE (preferably PyCharm).
+4. In IDE, select the python.exe of the virtual environment (of Anaconda) as a python interpreter.
+5. Intall all the packages given in requirements.txt (some packages may need to be installed via anaconda navigator).
+
 
 ---
 
 ## 🧬 Usage
 
-### Example: Running the FACT model
-```bash
-python main.py --method FACT --dataset DLPFC
-```
+In main file scatter.scatter('DLPFC'), FACT.FACT('DLPFC') and ACT.ACT('DLPFC') runs the clustering methods.  Methods will run for 'DLPFC'. Any compatible dataset can be given in place of it.
 
-### Example: Running Ensemble framework
-```bash
-python main.py --method Ensemble --dataset BreastCancer --gpu
-```
 
 ### Arguments
 | Flag | Description |
@@ -153,51 +136,10 @@ Compared with state-of-the-art methods:
 
 ---
 
-## 📘 Citation
-
-If you use this repository, please cite:
-
-```bibtex
-@article{azim2025trainable,
-  title={Trainable Clustering Framework for Spatial Transcriptomics},
-  author={Azim, Riasat and Aosaf, Sabab and Shatabda, Swakkhar and Rahman, M. Sohel and Islam, Salekul},
-  journal={Bioinformatics Advances},
-  year={2025},
-  publisher={Oxford University Press}
-}
-```
-
----
-
-## 🧑‍💻 Contributors
-
-- **Riasat Azim** — Concept, Methodology, Analysis  
-- **Sabab Aosaf** — Implementation, Statistical Evaluation  
-- **Swakkhar Shatabda** — Method Design, Supervision  
-- **M. Sohel Rahman** — Analysis, Review  
-- **Salekul Islam** — Supervision, Review  
-
----
-
-## 🧭 Funding
-
-This research was funded by the  
-**Institute for Advanced Research (IAR), United International University**  
-Grant Ref. No.: **IAR-02-2023-SE-25**
-
----
-
-## ⚖️ License
-
-This project is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file for details.
-
----
-
 ## 📢 Contact
 
 For queries or collaborations, please contact:  
-📧 **ri.asim@cse.uiu.ac.bd**  
-📧 **sababaosaf@outlook.com**
+📧 **sababaosaf19@gmail.com**
 
 ---
 
