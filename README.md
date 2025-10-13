@@ -106,18 +106,8 @@ cd FACTSpatialTranscriptomics
 
 In main file scatter.scatter('DLPFC'), FACT.FACT('DLPFC') and ACT.ACT('DLPFC') runs the clustering methods.  Methods will run for 'DLPFC'. Any compatible dataset can be given in place of it.
 
-
-### Arguments
-| Flag | Description |
-|------|--------------|
-| `--method` | Select model: `ACT`, `FACT`, `SCATTER`, or `Ensemble` |
-| `--dataset` | Choose dataset name (DLPFC / MouseBrain / BreastCancer) |
-| `--gpu` | (Optional) Enable GPU acceleration |
-| `--save-path` | Specify output directory for results |
-
 Outputs include:
-- Cluster assignments  
-- ARI/NMI metrics  
+- ARI/NMI/PAS/CHAOS/AWS/Morans I and Gearys I metrics  
 - Spatial domain plots  
 
 ---
