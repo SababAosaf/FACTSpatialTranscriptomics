@@ -14,6 +14,17 @@ Riasat Azim¹*, Sabab Aosaf², Swakkhar Shatabda³, Mohammad Sohel Rahman², and
 
 ## 🧩 Overview
 
+Spatial transcriptomics (ST) enables high-resolution exploration of tissue architecture by integrating gene
+expression profiles with spatial information, advancing insights into cellular composition, organization, and
+interactions. Among ST applications, spatial domain identification is critical for linking gene expression
+patterns to tissue morphology and analyzing the tissue microenvironment. We introduce a trainable clustering
+framework that unifies four complementary strategies—ACT, FACT, SCATTER, and their ensemble—into a
+cohesive architecture. By coupling autoencoder-driven feature learning with an MClust-assisted clustering layer,
+this framework enables joint optimization of representation and cluster assignments through a trainable loss
+function. Applied to Human DLPFC, Mouse Brain Anterior, and Human Breast Cancer datasets, the Proposed
+framework achieves comparably higher accuracy in most cases while reliably identifying spatial domains and
+preserving complex tissue architecture
+
 Spatial transcriptomics (ST) allows researchers to integrate **gene expression profiles** with **spatial tissue information**, enabling high-resolution exploration of tissue architecture.  
 This repository implements a **trainable clustering framework** that unifies four complementary methods:
 
@@ -23,6 +34,8 @@ This repository implements a **trainable clustering framework** that unifies fou
 - **ENSEMBLE** — Adaptive combination of the three methods  
 
 The framework couples **autoencoder-driven feature learning** with an **MClust-based clustering layer**, enabling **joint optimization of latent representations and cluster assignments** via a trainable loss function.
+
+
 
 ---
 
