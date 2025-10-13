@@ -46,7 +46,7 @@ for i in files:
 
     # define model
 
-    model = autoencoder.GraphST(adata, device=device)
+    model = autoencoder.Autoencoder(adata, device=device)
 
     # train model
     adata = model.train()

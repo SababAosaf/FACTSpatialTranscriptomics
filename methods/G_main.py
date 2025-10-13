@@ -20,7 +20,7 @@ from sklearn import metrics
 import simple_preprocess
 
 
-import autoencoder_clustering_feeding
+import ACT_Network
 print(55)
 from utils_edit_PCA import clustering
 

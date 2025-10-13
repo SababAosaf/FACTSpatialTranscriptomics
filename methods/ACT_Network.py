@@ -6,11 +6,11 @@ from sklearn.datasets import make_blobs
 import torch
 from numpy import set_printoptions
 #import check as ch
-from preprocess import preprocess_adj, preprocess_adj_sparse, preprocess, construct_interaction, construct_interaction_KNN, add_contrastive_label, get_feature, permutation, fix_seed
+from .preprocess import preprocess_adj, preprocess_adj_sparse, preprocess, construct_interaction, construct_interaction_KNN, add_contrastive_label, get_feature, permutation, fix_seed
 import time
 import random
 import numpy as np
-from autoencoder_model_cluster import Encoder, Encoder_sparse, Encoder_map, Encoder_sc
+from .autoencoder_model_cluster import Encoder, Encoder_sparse, Encoder_map, Encoder_sc
 from tqdm import tqdm
 from torch import nn
 import torch.nn.functional as F
@@ -18,10 +18,10 @@ from scipy.sparse.csc import csc_matrix
 from scipy.sparse.csr import csr_matrix
 import pandas as pd
 from fast_pytorch_kmeans import KMeans
-from utils_edit_PCA import clustering, mclust_training
+from .utils_edit_PCA import clustering, mclust_training
 
 
-class GraphST():
+class Embedding_Network():
     def __init__(self, 
         adata,
         neigh,
@@ -233,8 +233,7 @@ class GraphST():
                     tool = 'mclust'
 
                     # Types by CLustering on new data
-                    values = clustering(self.adata, 7, radius=radius, method=tool)
-
+                    clustering(self.adata, 7, radius=radius, method=tool)
                     old_type = self.adata.obs['domain'].values
 
                     for i in range(len(self.adata.obs['domain'])):
@@ -252,7 +251,7 @@ class GraphST():
 
 
                 loss = F.mse_loss(self.labels,current_labels)
-                print("CLUST: "+str(loss))
+                print("CLUST FOR ITERATION:"+str(epoch)+": "+str(loss))
 
                 # n_neigh = 50
                 # new_type = []
@@ -298,7 +297,7 @@ class GraphST():
                 #loss = self.alpha * self.loss_feat+self.alpha*l2
             #elif False :
             elif epoch>=2000:
-                if epoch % 50==000:
+                if epoch % 50==0:
                     self.model.weight1.requires_grad = True
                     self.adata.obsm['emb'] = self.hiden_feat.detach().cpu().numpy()
                     radius = 50
@@ -317,18 +316,25 @@ class GraphST():
                     current_labels = F.one_hot(torch.FloatTensor(self.adata.obs['domain']).long()-1,7).float().to(self.device)
 
                 #loss1 = F.mse_loss(self.labels, current_labels)
-                #print(self.labels)
-                #print(current_labels)
+                # log_labels = torch.log_softmax(self.labels, dim=1)
+                # log_labels = torch.log_softmax(self.labels, dim=1)
+                # print(self.labels)
+                # print(current_labels)
+
 
                 loss1= F.kl_div(self.labels.log(), current_labels, reduction='batchmean')
+                # loss1 = F.kl_div(self.labels, current_labels, reduction='batchmean')
+                print("BIG:"+str(loss1))
                 self.loss_feat = F.mse_loss(self.features, self.decoded)
 
                 loss=self.alpha * self.loss_feat+self.alpha *loss1 * 2
 
-                print("CLUST: "+str(loss))
+                # print("CLUST: "+str(loss))
+                print("CLUST FOR ITERATION:" + str(epoch) + ": " + str(loss))
             else:
                 self.loss_feat = F.mse_loss(self.features, self.decoded)
                 loss = self.alpha * self.loss_feat
+                print("CLUST FOR ITERATION:" + str(epoch) + ": " + str(loss))
 
 
             # n_neigh = 50

@@ -13,14 +13,15 @@ import torch
 import cv2
 import ot
 from PIL import Image
-
+import methods.autoencoder_model
 import scanpy as sc
 import pandas as pd
 from sklearn import metrics
-from methods import simple_preprocess
+import methods.simple_preprocess
 
 
-import methods.ACT_Network as ACT_Network
+import methods.ACT_Network
+
 from methods.utils_edit_PCA import clustering
 
 import methods.check as ch
@@ -34,68 +35,65 @@ import warnings
 warnings.simplefilter(action='ignore', category=pd.errors.SettingWithCopyWarning)
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-# def cosine_similarity(arr1, arr2):
-#
-#
-#     dot_product = np.dot(arr1, arr2)
-#     norm_arr1 = np.linalg.norm(arr1)
-#     norm_arr2 = np.linalg.norm(arr2)
-#
-#     cosine_sim = dot_product / (norm_arr1 * norm_arr2)
-#
-#     return cosine_sim
+def cosine_similarity(arr1, arr2):
 
 
+    dot_product = np.dot(arr1, arr2)
+    norm_arr1 = np.linalg.norm(arr1)
+    norm_arr2 = np.linalg.norm(arr2)
 
-def FACT(database):
+    cosine_sim = dot_product / (norm_arr1 * norm_arr2)
 
+    return cosine_sim
+
+
+def ACT(database):
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
     os.environ['R_HOME'] = 'C:\Program Files\R\R-4.3.2'
+
     n_clusters = 7
+
 
     #typess='Sample ,Accuracy,Accuracy,Accuracy,Continuity,Continuity,Continuity,,Marker score,Marker score\n'
     #typess='Sample ,ARI,nmi,hom,cm,chaos,pas,aws,time,space,moranI,gearyC\n'
     # database='DLPFC'
+    # files=os.listdir('E:\Project_Large_Datasets\ST\\'+database)
     # files=[ '151507','151508', '151509', '151510', '151669', '151670', '151671', '151672','151673', '151674', '151675', '151676']
     # files=['151673']
     # ground_truth='layer_guess'
 
-    if database == 'DLPFC':
-        ground_truth = 'layer_guess'
-    else:
-        ground_truth = 'ground_truth'
 
     files=os.listdir(database)
+    ground_truth = 'layer_guess'
+
+    if database=='DLPFC':
+        ground_truth = 'layer_guess'
+    else:
+        ground_truth='ground_truth'
 
     #typess=' - ,Accuracy,Accuracy,Accuracy,Continuity,Continuity,Continuity,Marker score,Marker score\n'
     c_ = ' - ,ARI,nmi,hom,cm,chaos,pas,aws,time,space,moranI,gearyC\n'
     typess= c_
 
-    # files = ['151673']
+    files = ['151673']
     for i in files:
-
-
-
         tracemalloc.start()
         start_time=time.time()
         radius = 50
         tool = 'mclust'
         #                       READ
         dataset = database+'\\'+i
-
+        file_fold =  str(dataset) #please replace 'file_fold' with the download path
+        adata = sc.read_visium(file_fold, count_file='filtered_feature_bc_matrix.h5', load_images=True)
+        adata.var_names_make_unique()
         if database!='DLPFC':
             file_fold = str(dataset)
             df_metas = pd.read_csv(file_fold + '/metadata.tsv', sep='\t')
             unique_values_count = df_metas['ground_truth'].nunique()
             n_clusters = unique_values_count
             if n_clusters>21:n_clusters=12
-
-
-        file_fold =  str(dataset) #please replace 'file_fold' with the download path
-        adata = sc.read_visium(file_fold, count_file='filtered_feature_bc_matrix.h5', load_images=True)
-        adata.var_names_make_unique()
-
         points = adata.obsm['spatial']
         position = adata.obsm['spatial']
         #__________________________________________SPATIAL COORDINATES INCLUSION__________________________________________
@@ -214,26 +212,26 @@ def FACT(database):
 
 
         #_____________________________ Scatter method____________________________________
-        for pk in range(1,500):
-            low = 0  # lower bound
-            high = len(feat)-1  # upper bound
-            num_random_numbers = 200  # number of random numbers
-            random_numbers = [random.randint(low, high) for _ in range(num_random_numbers)]
-            id=[]
-            for ikj in random_numbers:
-                ip=feat[ikj]
-                sorted_indices = np.argsort(ip)[::-1]
-                top_n = 50
-                highest_indices = sorted_indices[:top_n]
-                id.extend(highest_indices.tolist())
-
-            counter = Counter(id)
-            most_common_number = counter.most_common(10)
-
-
-
-            for value, count in most_common_number:
-                adata.var['highly_variable'][value] = False
+        # for pk in range(1,500):
+        #     low = 0  # lower bound
+        #     high = len(feat)-1  # upper bound
+        #     num_random_numbers = 200  # number of random numbers
+        #     random_numbers = [random.randint(low, high) for _ in range(num_random_numbers)]
+        #     id=[]
+        #     for ikj in random_numbers:
+        #         ip=feat[ikj]
+        #         sorted_indices = np.argsort(ip)[::-1]
+        #         top_n = 50
+        #         highest_indices = sorted_indices[:top_n]
+        #         id.extend(highest_indices.tolist())
+        #
+        #     counter = Counter(id)
+        #     most_common_number = counter.most_common(10)
+        #
+        #
+        #
+        #     for value, count in most_common_number:
+        #         adata.var['highly_variable'][value] = False
 
         # <////////////////>_________________ Scatter method____________________________________
 
@@ -299,9 +297,9 @@ def FACT(database):
 
 
         if 'highly_variable' not in adata.var.keys():
-            simple_preprocess.preprocess(adata)
+            methods.simple_preprocess.preprocess(adata)
         if 'feat' not in adata.obsm.keys():
-            simple_preprocess.get_feature(adata)
+            methods.simple_preprocess.get_feature(adata)
 
 
         # adata.obsm['emb'] = adata.obsm['feat']
@@ -401,9 +399,7 @@ def FACT(database):
 
 
         adata.obsm['emb']=  adata.obsm['feat']
-
-
-        model = ACT_Network.Embedding_Network(adata,d_small, distance_matrix,device=device)
+        model = methods.ACT_Network.Embedding_Network(adata,d_small, distance_matrix,device=device)
 
         # train model
         adata = model.train()
@@ -460,10 +456,10 @@ def FACT(database):
         print("ARI:::")
         print(ARI)
 
-        # sc.pl.spatial(adata,
-        #               img_key="hires",
-        #               color=["ground_truth", "domain"],
-        #               title=["Ground truth", "ARI=%.4f"%ARI],
-        #               show=True)
+        sc.pl.spatial(adata,
+                      img_key="hires",
+                      color=["ground_truth", "domain"],
+                      title=["Ground truth", "ARI=%.4f"%ARI],
+                      show=True)
 
     print(typess)

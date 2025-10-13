@@ -15,7 +15,7 @@ from scipy.sparse.csc import csc_matrix
 from scipy.sparse.csr import csr_matrix
 import pandas as pd
 from utils_edit_PCA import clustering
-class GraphST():
+class Autoencoder_Clustering():
     def __init__(self, 
         adata,
         adata_sc = None,

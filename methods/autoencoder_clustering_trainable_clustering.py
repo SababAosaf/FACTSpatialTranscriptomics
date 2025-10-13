@@ -4,20 +4,20 @@ from sklearn.cluster import KMeans, DBSCAN
 from sklearn.datasets import make_blobs
 import torch
 from numpy import set_printoptions
-#import check as ch
-from preprocess import preprocess_adj, preprocess_adj_sparse, preprocess, construct_interaction, construct_interaction_KNN, add_contrastive_label, get_feature, permutation, fix_seed
+#import methods.check as ch
+from methods.preprocess import preprocess_adj, preprocess_adj_sparse, preprocess, construct_interaction, construct_interaction_KNN, add_contrastive_label, get_feature, permutation, fix_seed
 import time
 import random
 import numpy as np
-from autoencoder_model_cluster import Encoder, Encoder_sparse, Encoder_map, Encoder_sc
+from methods.autoencoder_model_cluster import Encoder, Encoder_sparse, Encoder_map, Encoder_sc
 from tqdm import tqdm
 from torch import nn
 import torch.nn.functional as F
 from scipy.sparse.csc import csc_matrix
 from scipy.sparse.csr import csr_matrix
 import pandas as pd
-from utils_edit_PCA import clustering
-class GraphST():
+from methods.utils_edit_PCA import clustering
+class Autoencoder_Clustering_Trainable_Clustering():
     def __init__(self, 
         adata,
         adata_sc = None,

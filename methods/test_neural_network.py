@@ -15,7 +15,7 @@ from sklearn import metrics
 import simple_preprocess
 import autoencoder
 import autoencoder_clustering_trainable_clustering
-import autoencoder_clustering_feeding
+import ACT_Network
 from utils_edit_PCA import clustering
 import check as ch
 from scipy import spatial

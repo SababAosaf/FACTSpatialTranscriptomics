@@ -2,14 +2,14 @@ import os
 import time
 import tracemalloc
 import torch
-import autoencoder_model
+import methods.autoencoder_model as autoencoder_model
 import scanpy as sc
 import pandas as pd
 from sklearn import metrics
-import MclustSIMPLE_preprocess
-import autoencoder
-from utils_edit_Mclust_SIMPLE import clustering
-import check as ch
+import methods.MclustSIMPLE_preprocess as MclustSIMPLE_preprocess
+import methods.autoencoder as autoencoder
+from methods.utils_edit_Mclust_SIMPLE import clustering
+import methods.check as ch
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 os.environ['R_HOME'] = 'C:\Program Files\R\R-4.3.2'

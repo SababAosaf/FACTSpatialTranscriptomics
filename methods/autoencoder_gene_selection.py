@@ -3,11 +3,11 @@ import sys
 import torch
 from numpy import set_printoptions
 
-from preprocess_geneselection import preprocess_adj, preprocess_adj_sparse, preprocess, construct_interaction, construct_interaction_KNN, add_contrastive_label, get_feature, permutation, fix_seed
+from methods.preprocess_geneselection import preprocess_adj, preprocess_adj_sparse, preprocess, construct_interaction, construct_interaction_KNN, add_contrastive_label, get_feature, permutation, fix_seed
 import time
 import random
 import numpy as np
-from autoencoder_model_gene_selection import Encoder, Encoder_sparse, Encoder_map, Encoder_sc
+from methods.autoencoder_model_gene_selection import Encoder, Encoder_sparse, Encoder_map, Encoder_sc
 from tqdm import tqdm
 from torch import nn
 import torch.nn.functional as F
@@ -15,7 +15,7 @@ from scipy.sparse.csc import csc_matrix
 from scipy.sparse.csr import csr_matrix
 import pandas as pd
     
-class GraphST():
+class Autoencoder_Gene_Selection():
     def __init__(self, 
         adata,
         adata_sc = None,

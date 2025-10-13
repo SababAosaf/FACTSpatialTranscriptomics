@@ -6,11 +6,11 @@ from sklearn.datasets import make_blobs
 import torch
 from numpy import set_printoptions
 #import check as ch
-from preprocess import preprocess_adj, preprocess_adj_sparse, preprocess, construct_interaction, construct_interaction_KNN, add_contrastive_label, get_feature, permutation, fix_seed
+from methods.preprocess import preprocess_adj, preprocess_adj_sparse, preprocess, construct_interaction, construct_interaction_KNN, add_contrastive_label, get_feature, permutation, fix_seed
 import time
 import random
 import numpy as np
-from autoencoder_model_cluster import Encoder, Encoder_sparse, Encoder_map, Encoder_sc
+from methods.autoencoder_model_cluster import Encoder, Encoder_sparse, Encoder_map, Encoder_sc
 from tqdm import tqdm
 from torch import nn
 import torch.nn.functional as F
@@ -18,10 +18,10 @@ from scipy.sparse.csc import csc_matrix
 from scipy.sparse.csr import csr_matrix
 import pandas as pd
 from fast_pytorch_kmeans import KMeans
-from utils_edit_PCA import clustering, mclust_training
+from methods.utils_edit_PCA import clustering, mclust_training
 
 
-class GraphST():
+class Scatter_Auto_Encoder():
     def __init__(self, 
         adata,
         neigh,
