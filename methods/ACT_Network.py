@@ -112,14 +112,14 @@ class Embedding_Network():
            preprocess(self.adata)
 
 
-        if 'adj' not in adata.obsm.keys():
-           if self.datatype in ['Stereo', 'Slide']:
-              construct_interaction_KNN(self.adata)
-           else:    
-              construct_interaction(self.adata)
-
-        if 'label_CSL' not in adata.obsm.keys():    
-           add_contrastive_label(self.adata)
+        # if 'adj' not in adata.obsm.keys():
+        #    if self.datatype in ['Stereo', 'Slide']:
+        #       construct_interaction_KNN(self.adata)
+        #    else:
+        #       construct_interaction(self.adata)
+        #
+        # if 'label_CSL' not in adata.obsm.keys():
+        #    add_contrastive_label(self.adata)
            
         if 'feat' not in adata.obsm.keys():
            get_feature(self.adata)
@@ -131,9 +131,9 @@ class Embedding_Network():
 
 
         self.features_a = torch.FloatTensor(self.adata.obsm['feat_a'].copy()).to(self.device)
-        self.label_CSL = torch.FloatTensor(self.adata.obsm['label_CSL']).to(self.device)
+        #self.label_CSL = torch.FloatTensor(self.adata.obsm['label_CSL']).to(self.device)
         # self.primary_labels = torch.FloatTensor(self.adata.obs['domain']).to(self.device)
-        self.adj = self.adata.obsm['adj']
+        #self.adj = self.adata.obsm['adj']
         # self.spatialx_ = torch.FloatTensor(self.adata.obsm['spatialx']).to(self.device)
         # self.spatialy_ = torch.FloatTensor(self.adata.obsm['spatialy']).to(self.device)
         # self.spatialx=self.adata.obsm['spatialx']
@@ -141,7 +141,7 @@ class Embedding_Network():
         # np.savetxt('n.txt', self.adata.obsm['graph_neigh'],fmt='%i')
         # np.savetxt('aj.txt', self.adata.obsm['adj'],fmt='%i')
 
-        self.graph_neigh = torch.FloatTensor(self.adata.obsm['graph_neigh'].copy() + np.eye(self.adj.shape[0])).to(self.device)
+        #self.graph_neigh = torch.FloatTensor(self.adata.obsm['graph_neigh'].copy() + np.eye(self.adj.shape[0])).to(self.device)
         # print("HERE : 1.2")
         self.distance_matrix=torch.from_numpy(distance_matrix)
 
@@ -155,9 +155,10 @@ class Embedding_Network():
         else: 
            # standard version
            # print("HERE : 1.21")
-           self.adj = preprocess_adj(self.adj)
+           #self.adj = preprocess_adj(self.adj)
            # print("HERE : 1.22")
-           self.adj = torch.FloatTensor(self.adj).to(self.device)
+           #self.adj = torch.FloatTensor(self.adj).to(self.device)
+           pass
 
 
         if self.deconvolution:
@@ -191,9 +192,9 @@ class Embedding_Network():
     def train(self):
 
         if self.datatype in ['Stereo', 'Slide']:
-           self.model = Encoder_sparse(self.dim_input, self.dim_output, self.graph_neigh).to(self.device)
+           self.model = Encoder_sparse(self.dim_input, self.dim_output).to(self.device)
         else:
-            self.model = Encoder(self.dim_input, self.dim_output ,self.graph_neigh).to(self.device)
+            self.model = Encoder(self.dim_input, self.dim_output ).to(self.device)
             self.loss_CSL = nn.BCEWithLogitsLoss()
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), self.learning_rate,
@@ -205,7 +206,7 @@ class Embedding_Network():
         self.model.train()
 
         clusr=0
-
+        print("HERE")
         # Convert data to PyTorch tensor
         data, _ = make_blobs(n_samples=self.features.shape[0], centers=7, cluster_std=0.60, random_state=0)
 
@@ -213,21 +214,24 @@ class Embedding_Network():
         tensor_data = torch.from_numpy(data).float()
         centroids = tensor_data[torch.randperm(tensor_data.size(0))[:7]]
         #UPDATED
+        ONE_THOUSAND=1000
+        TWO_THOUSAND=2000
         self.epochs=3000
+
         for epoch in tqdm(range(self.epochs)):
             self.model.train()
 
             self.features_a = permutation(self.features)
-            self.hiden_feat, self.decoded,self.labels = self.model(self.features, self.features_a, self.adj)
+            self.hiden_feat, self.decoded,self.labels = self.model(self.features, self.features_a)
             #self.hiden_feat, self.decoded = self.model(self.features, self.features_a, self.adj)
 
 
 
             #if  False:
-            if   epoch >= 1000 and epoch<2000:
-                if epoch ==1000:
+            if   epoch >= ONE_THOUSAND and epoch<TWO_THOUSAND:
+                if epoch ==ONE_THOUSAND:
                     self.model.weight1.requires_grad = False
-                if epoch%100==0:
+                if epoch%(int(ONE_THOUSAND/10))==0:
                     self.adata.obsm['emb'] = self.hiden_feat.detach().cpu().numpy()
                     radius = 50
                     tool = 'mclust'
@@ -296,7 +300,7 @@ class Embedding_Network():
 
                 #loss = self.alpha * self.loss_feat+self.alpha*l2
             #elif False :
-            elif epoch>=2000:
+            elif epoch>=TWO_THOUSAND:
                 if epoch % 50==0:
                     self.model.weight1.requires_grad = True
                     self.adata.obsm['emb'] = self.hiden_feat.detach().cpu().numpy()
@@ -318,13 +322,17 @@ class Embedding_Network():
                 #loss1 = F.mse_loss(self.labels, current_labels)
                 # log_labels = torch.log_softmax(self.labels, dim=1)
                 # log_labels = torch.log_softmax(self.labels, dim=1)
+                # print("The Labels >>>")
                 # print(self.labels)
                 # print(current_labels)
 
+                eps = 1e-8
+                loss1 = F.kl_div(self.labels.clamp_min(eps).log(),
+                                 current_labels.clamp_min(eps),
+                                 reduction="batchmean")
 
-                loss1= F.kl_div(self.labels.log(), current_labels, reduction='batchmean')
                 # loss1 = F.kl_div(self.labels, current_labels, reduction='batchmean')
-                print("BIG:"+str(loss1))
+                # print("BIG:"+str(loss1))
                 self.loss_feat = F.mse_loss(self.features, self.decoded)
 
                 loss=self.alpha * self.loss_feat+self.alpha *loss1 * 2
@@ -447,7 +455,7 @@ class Embedding_Network():
 
         # self.emb_rec = self.model(self.features, self.features_a, self.adj)[0].detach().cpu().numpy()
         # self.adata.obsm['emb'] = torch.Tensor.cpu(self.features).numpy()
-        self.emb_rec = self.model(self.features, self.features_a, self.adj)[0].detach().cpu().numpy()
+        self.emb_rec = self.model(self.features, self.features_a)[0].detach().cpu().numpy()
         self.adata.obsm['emb'] = self.emb_rec
         print("ADATA")
         print(self.adata)

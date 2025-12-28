@@ -10,7 +10,7 @@ from methods.preprocess import preprocess_adj, preprocess_adj_sparse, preprocess
 import time
 import random
 import numpy as np
-from methods.autoencoder_model_cluster import Encoder, Encoder_sparse, Encoder_map, Encoder_sc
+from methods.autoencoder_model_scatter import Encoder, Encoder_sparse, Encoder_map, Encoder_sc
 from tqdm import tqdm
 from torch import nn
 import torch.nn.functional as F
@@ -25,7 +25,7 @@ class Scatter_Auto_Encoder():
     def __init__(self, 
         adata,
         neigh,
-        distance_matrix,
+        distance_matrix=None,
         labels=None ,
         adata_sc = None,
         device= torch.device('cpu'),
@@ -112,11 +112,11 @@ class Scatter_Auto_Encoder():
            preprocess(self.adata)
 
 
-        if 'adj' not in adata.obsm.keys():
-           if self.datatype in ['Stereo', 'Slide']:
-              construct_interaction_KNN(self.adata)
-           else:    
-              construct_interaction(self.adata)
+        # if 'adj' not in adata.obsm.keys():
+        #    if self.datatype in ['Stereo', 'Slide']:
+        #       construct_interaction_KNN(self.adata)
+        #    else:
+        #       construct_interaction(self.adata)
 
         if 'label_CSL' not in adata.obsm.keys():    
            add_contrastive_label(self.adata)
@@ -133,7 +133,7 @@ class Scatter_Auto_Encoder():
         self.features_a = torch.FloatTensor(self.adata.obsm['feat_a'].copy()).to(self.device)
         self.label_CSL = torch.FloatTensor(self.adata.obsm['label_CSL']).to(self.device)
         # self.primary_labels = torch.FloatTensor(self.adata.obs['domain']).to(self.device)
-        self.adj = self.adata.obsm['adj']
+        # self.adj = self.adata.obsm['adj']
         # self.spatialx_ = torch.FloatTensor(self.adata.obsm['spatialx']).to(self.device)
         # self.spatialy_ = torch.FloatTensor(self.adata.obsm['spatialy']).to(self.device)
         # self.spatialx=self.adata.obsm['spatialx']
@@ -141,9 +141,9 @@ class Scatter_Auto_Encoder():
         # np.savetxt('n.txt', self.adata.obsm['graph_neigh'],fmt='%i')
         # np.savetxt('aj.txt', self.adata.obsm['adj'],fmt='%i')
 
-        self.graph_neigh = torch.FloatTensor(self.adata.obsm['graph_neigh'].copy() + np.eye(self.adj.shape[0])).to(self.device)
+        # self.graph_neigh = torch.FloatTensor(self.adata.obsm['graph_neigh'].copy() + np.eye(self.adj.shape[0])).to(self.device)
         # print("HERE : 1.2")
-        self.distance_matrix=torch.from_numpy(distance_matrix)
+        # self.distance_matrix=torch.from_numpy(distance_matrix)
 
         self.dim_input = self.features.shape[1]
         self.dim_output = dim_output
@@ -155,9 +155,7 @@ class Scatter_Auto_Encoder():
         else: 
            # standard version
            # print("HERE : 1.21")
-           self.adj = preprocess_adj(self.adj)
-           # print("HERE : 1.22")
-           self.adj = torch.FloatTensor(self.adj).to(self.device)
+           pass
 
 
         if self.deconvolution:
@@ -191,9 +189,9 @@ class Scatter_Auto_Encoder():
     def train(self):
 
         if self.datatype in ['Stereo', 'Slide']:
-           self.model = Encoder_sparse(self.dim_input, self.dim_output, self.graph_neigh).to(self.device)
+           self.model = Encoder_sparse(self.dim_input, self.dim_output).to(self.device)
         else:
-            self.model = Encoder(self.dim_input, self.dim_output ,self.graph_neigh).to(self.device)
+            self.model = Encoder(self.dim_input, self.dim_output ).to(self.device)
             self.loss_CSL = nn.BCEWithLogitsLoss()
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), self.learning_rate,
@@ -207,18 +205,18 @@ class Scatter_Auto_Encoder():
         clusr=0
 
         # Convert data to PyTorch tensor
-        data, _ = make_blobs(n_samples=self.features.shape[0], centers=7, cluster_std=0.60, random_state=0)
+        data, _ = make_blobs(n_samples=self.features.shape[0], centers=14, cluster_std=0.60, random_state=0)
 
         # Convert data to PyTorch tensor
         tensor_data = torch.from_numpy(data).float()
-        centroids = tensor_data[torch.randperm(tensor_data.size(0))[:7]]
+        centroids = tensor_data[torch.randperm(tensor_data.size(0))[:14]]
         #UPDATED
         self.epochs=3000
         for epoch in tqdm(range(self.epochs)):
             self.model.train()
 
             self.features_a = permutation(self.features)
-            self.hiden_feat, self.decoded,self.labels = self.model(self.features, self.features_a, self.adj)
+            self.hiden_feat, self.decoded = self.model(self.features, self.features_a)
 
             self.loss_feat = F.mse_loss(self.features, self.decoded)
             loss = self.alpha * self.loss_feat
@@ -229,7 +227,7 @@ class Scatter_Auto_Encoder():
         
         print("Optimization finished for ST data!")
 
-        self.emb_rec = self.model(self.features, self.features_a, self.adj)[0].detach().cpu().numpy()
+        self.emb_rec = self.model(self.features, self.features_a)[0].detach().cpu().numpy()
         self.adata.obsm['emb'] = self.emb_rec
         print("ADATA")
         print(self.adata)

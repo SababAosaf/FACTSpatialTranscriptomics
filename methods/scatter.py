@@ -6,25 +6,16 @@ import time
 import tracemalloc
 import random
 from collections import Counter
-import numpy
-from torchvision import models, transforms
-import numpy as np
 import torch
 import cv2
 import ot
-from PIL import Image
-import methods.autoencoder_model as autoencoder_model
 import scanpy as sc
 import pandas as pd
 from sklearn import metrics
 import methods.simple_preprocess as simple_preprocess
 import methods.scatter_auto_encoder as scatter_auto_encoder
 from methods.utils_edit_PCA import clustering
-
 import methods.check as ch
-from scipy import spatial
-from numpy import dot
-from numpy.linalg import norm
 import numpy as np
 from scipy.sparse.csc import csc_matrix
 from scipy.sparse.csr import csr_matrix
@@ -50,7 +41,7 @@ def scatter(database):
     n_clusters = 7
 
     #typess='Sample ,Accuracy,Accuracy,Accuracy,Continuity,Continuity,Continuity,,Marker score,Marker score\n'
-    #typess='Sample ,ARI,nmi,hom,cm,chaos,pas,aws,time,space,moranI,gearyC\n'
+    typess='Sample ,ARI,nmi,hom,cm,chaos,pas,aws,time,space,moranI,gearyC, Refine_conflict\n'
 
 
     # database='DLPFC'
@@ -69,10 +60,11 @@ def scatter(database):
 
 
     #typess=' - ,Accuracy,Accuracy,Accuracy,Continuity,Continuity,Continuity,Marker score,Marker score\n'
-    c_ = ' - ,ARI,nmi,hom,cm,chaos,pas,aws,time,space,moranI,gearyC\n'
+    c_ = ' - ,ARI,nmi,hom,cm,chaos,pas,aws,time,space,moranI,gearyC,Refine_conflict\n'
     typess= c_
 
-    files = ['151671']
+    # files = ['151671']
+    print(files)
     for i in files:
 
         tracemalloc.start()
@@ -81,7 +73,7 @@ def scatter(database):
         tool = 'mclust'
         #                       READ
         dataset = database+'\\'+i
-
+        print(dataset)
         if database!='DLPFC':
             file_fold = str(dataset)
             df_metas = pd.read_csv(file_fold + '/metadata.tsv', sep='\t')
@@ -146,7 +138,9 @@ def scatter(database):
 
 
         #_____________________________ Scatter method____________________________________
+        knob=80
         for pk in range(1,500):
+            val=knob//10
             low = 0  # lower bound
             high = len(feat)-1  # upper bound
             num_random_numbers = 200  # number of random numbers
@@ -160,7 +154,7 @@ def scatter(database):
                 id.extend(highest_indices.tolist())
 
             counter = Counter(id)
-            most_common_number = counter.most_common(10)
+            most_common_number = counter.most_common(val)
 
 
 
@@ -185,10 +179,10 @@ def scatter(database):
 
         # clustering
         #adata.obsm['emb'] = np.append(adata.obsm['emb'],  points/13000, axis=1)
-
+        totalis=-1
         if tool == 'mclust':
            #values=clustering(adata, 7, radius=radius, method=tool, refinement=True) # For DLPFC dataset, we use optional refinement step.
-           values = clustering(adata, n_clusters, radius=radius, method=tool, refinement=True)
+           values,totalis = clustering(adata, n_clusters, radius=radius, method=tool, refinement=True)
         elif tool in ['leiden', 'louvain']:
            clustering(adata, n_clusters, radius=radius, method=tool, start=0.1, end=2.0, increment=0.01, refinement=False)
 
@@ -225,7 +219,7 @@ def scatter(database):
             aws = ch.compute_ASW(adata, 'domain')
             print(ARI)
 
-            typess=typess+i+','+str(ARI)+','+str(nmi)+','+str(hom)+','+str(cm)+','+str(chaos)+','+str(pas)+','+str(aws)+','+str(during_time)+','+str(memory)+','+str(moranI)+','+str(gearyC)+'\n'
+            typess=typess+i+','+str(ARI)+','+str(nmi)+','+str(hom)+','+str(cm)+','+str(chaos)+','+str(pas)+','+str(aws)+','+str(during_time)+','+str(memory)+','+str(moranI)+','+str(gearyC)+','+str(totalis)+'\n'
 
         else:
             typess = typess + i + ',' + str("TBD") + ',' + str("TBD") + ',' + str("TBD") + ',' + str("TBD") + ',' + str(
@@ -234,10 +228,20 @@ def scatter(database):
         print("ARI:::")
         print(ARI)
 
-        sc.pl.spatial(adata,
-                      img_key="hires",
-                      color=["ground_truth", "domain"],
-                      title=["Ground truth", "ARI=%.4f"%ARI],
-                      show=True)
+        # sc.pl.spatial(adata,
+        #               img_key="hires",
+        #               color=["ground_truth", "domain"],
+        #               title=["Ground truth", "ARI=%.4f"%ARI],
+        #               show=True)
+
+        sc.pl.spatial(
+            adata,
+            img_key="hires",
+            color=["ground_truth", "domain"],
+            title=[f"Ground truth ({i})", f"Scatter ({i})"],
+            show=False,
+            save=f"_{i}_GT_vs_Scatter.png"
+        )
+
 
     print(typess)

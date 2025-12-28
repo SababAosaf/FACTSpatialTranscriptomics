@@ -47,11 +47,11 @@ class AvgReadout(nn.Module):
         return F.normalize(global_emb, p=2, dim=1) 
     
 class Encoder(Module):
-    def __init__(self, in_features, out_features, graph_neigh ,dropout=0.0, act=F.relu):
+    def __init__(self, in_features, out_features ,dropout=0.0, act=F.relu):
         super(Encoder, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
-        self.graph_neigh = graph_neigh
+
         self.dropout = dropout
         self.act = act
 
@@ -78,7 +78,7 @@ class Encoder(Module):
         # torch.nn.init.xavier_uniform_(self.spatialxw)
         # torch.nn.init.xavier_uniform_(self.spatialyw)
 
-    def forward(self, feat, feat_a, adj):
+    def forward(self, feat, feat_a):
 
         z = torch.mm(feat, self.weight1)
         hiden_emb = z
@@ -93,11 +93,11 @@ class Encoder_sparse(Module):
     """
     Sparse version of Encoder
     """
-    def __init__(self, in_features, out_features, graph_neigh, dropout=0.0, act=F.relu):
+    def __init__(self, in_features, out_features, dropout=0.0, act=F.relu):
         super(Encoder_sparse, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
-        self.graph_neigh = graph_neigh
+
         self.dropout = dropout
         self.act = act
         

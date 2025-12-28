@@ -74,10 +74,10 @@ def ACT(database):
         ground_truth='ground_truth'
 
     #typess=' - ,Accuracy,Accuracy,Accuracy,Continuity,Continuity,Continuity,Marker score,Marker score\n'
-    c_ = ' - ,ARI,nmi,hom,cm,chaos,pas,aws,time,space,moranI,gearyC\n'
+    c_ = ' - ,ARI,nmi,hom,cm,chaos,pas,aws,time,space,moranI,gearyC,Refine_conflicts\n'
     typess= c_
 
-    files = ['151673']
+    #files = ['151673']
     for i in files:
         tracemalloc.start()
         start_time=time.time()
@@ -140,6 +140,7 @@ def ACT(database):
             feat = adata_Vars.X.toarray()[:, ]
         else:
             feat = adata_Vars.X[:, ]
+
 
         sc.pp.normalize_total(adata, target_sum=1e4)
         sc.pp.log1p(adata)
@@ -295,9 +296,9 @@ def ACT(database):
         ####     print(highest_indices)
 
 
-
-        if 'highly_variable' not in adata.var.keys():
-            methods.simple_preprocess.preprocess(adata)
+        #
+        # if 'highly_variable' not in adata.var.keys():
+        #     methods.simple_preprocess.preprocess(adata)
         if 'feat' not in adata.obsm.keys():
             methods.simple_preprocess.get_feature(adata)
 
@@ -407,10 +408,10 @@ def ACT(database):
 
         # clustering
         #adata.obsm['emb'] = np.append(adata.obsm['emb'],  points/13000, axis=1)
-
+        totalis=-1
         if tool == 'mclust':
            #values=clustering(adata, 7, radius=radius, method=tool, refinement=True) # For DLPFC dataset, we use optional refinement step.
-           values = clustering(adata, n_clusters, radius=radius, method=tool, refinement=True)
+           values,totalis = clustering(adata, n_clusters, radius=radius, method=tool, refinement=True)
         elif tool in ['leiden', 'louvain']:
            clustering(adata, n_clusters, radius=radius, method=tool, start=0.1, end=2.0, increment=0.01, refinement=False)
 
@@ -447,7 +448,7 @@ def ACT(database):
             aws = ch.compute_ASW(adata, 'domain')
             print(ARI)
 
-            typess=typess+i+','+str(ARI)+','+str(nmi)+','+str(hom)+','+str(cm)+','+str(chaos)+','+str(pas)+','+str(aws)+','+str(during_time)+','+str(memory)+','+str(moranI)+','+str(gearyC)+'\n'
+            typess=typess+i+','+str(ARI)+','+str(nmi)+','+str(hom)+','+str(cm)+','+str(chaos)+','+str(pas)+','+str(aws)+','+str(during_time)+','+str(memory)+','+str(moranI)+','+str(gearyC)+","+str(totalis)+'\n'
 
         else:
             typess = typess + i + ',' + str("TBD") + ',' + str("TBD") + ',' + str("TBD") + ',' + str("TBD") + ',' + str(
@@ -456,10 +457,13 @@ def ACT(database):
         print("ARI:::")
         print(ARI)
 
-        sc.pl.spatial(adata,
-                      img_key="hires",
-                      color=["ground_truth", "domain"],
-                      title=["Ground truth", "ARI=%.4f"%ARI],
-                      show=True)
 
+        sc.pl.spatial(
+            adata,
+            img_key="hires",
+            color=["ground_truth", "domain"],
+            title=[f"Ground truth ({i})", f"ACT ({i})"],
+            show=False,
+            save=f"_{i}_GT_vs_ACT.png"
+        )
     print(typess)

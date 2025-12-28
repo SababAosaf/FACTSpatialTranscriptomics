@@ -119,6 +119,7 @@ def get_feature(adata, deconvolution=False):
     
     # data augmentation
     feat_a = permutation(feat)
+    print(feat)
     
     adata.obsm['feat'] = feat
     adata.obsm['feat_a'] = feat_a    

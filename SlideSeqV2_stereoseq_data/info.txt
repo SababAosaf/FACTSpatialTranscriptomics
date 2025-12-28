@@ -1,0 +1,9 @@
+SlideSeqv2 collected using --------->
+
+import squidpy as sq
+adata = sq.datasets.slideseqv2()
+
+
+StereoSeq ---------->
+
+https://drive.google.com/drive/folders/1CAJ1z8ZchrOg3mxs48aD_bTglflobydh

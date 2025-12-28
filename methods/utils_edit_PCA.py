@@ -94,7 +94,7 @@ def clustering(adata, n_clusters=15, radius=50, key='emb', method='mclust', star
 
     adata.obsm['emb_pca'] = adata.obsm['emb'].copy()
     print("DATA")
-    print(adata.obsm['emb_pca'])
+    print(adata.obsm['emb_pca'].shape)
     #adata.obsm['emb_pca'] = embedding
     if method == 'mclust':
 
@@ -113,12 +113,12 @@ def clustering(adata, n_clusters=15, radius=50, key='emb', method='mclust', star
        res = search_res(adata, n_clusters, use_rep='emb_pca', method=method, start=start, end=end, increment=increment)
        sc.tl.louvain(adata, random_state=0, resolution=res)
        adata.obs['domain'] = adata.obs['louvain'] 
-       
+    totalis=-1
     if refinement:  
-       new_type = refine_label(adata, radius, key='domain')
+       new_type, totalis = refine_label(adata, radius, key='domain')
        adata.obs["UNREFINED"]=adata.obs['domain']
        adata.obs['domain'] = new_type
-    return "CORRECT"
+    return "CORRECT",totalis
        
 def refine_label(adata, radius=50, key='label'):
     n_neigh = radius
@@ -130,7 +130,7 @@ def refine_label(adata, radius=50, key='label'):
     distance = ot.dist(position, position, metric='euclidean')
            
     n_cell = distance.shape[0]
-    
+    totalis=0
     for i in range(n_cell):
         vec  = distance[i, :]
         index = vec.argsort()
@@ -139,11 +139,18 @@ def refine_label(adata, radius=50, key='label'):
             neigh_type.append(old_type[index[j]])
         max_type = max(neigh_type, key=neigh_type.count)
         new_type.append(max_type)
+        print(str(new_type))
+        print(old_type[i])
+        if str(new_type)!= str(old_type[i]):
+            totalis=totalis+1
+
         
-    new_type = [str(i) for i in list(new_type)]    
+    new_type = [str(i) for i in list(new_type)]
+    # print(new_type)
+    # print(old_type)
     #adata.obs['label_refined'] = np.array(new_type)
     
-    return new_type
+    return new_type, totalis
 
 
 def refine_label1(adata, radius=50, key='label'):

@@ -69,10 +69,10 @@ def FACT(database):
     files=os.listdir(database)
 
     #typess=' - ,Accuracy,Accuracy,Accuracy,Continuity,Continuity,Continuity,Marker score,Marker score\n'
-    c_ = ' - ,ARI,nmi,hom,cm,chaos,pas,aws,time,space,moranI,gearyC\n'
+    c_ = ' - ,ARI,nmi,hom,cm,chaos,pas,aws,time,space,moranI,gearyC,Refing_Conflicts\n'
     typess= c_
 
-    # files = ['151673']
+    # files = ['151674','151676']
     for i in files:
 
 
@@ -411,10 +411,10 @@ def FACT(database):
 
         # clustering
         #adata.obsm['emb'] = np.append(adata.obsm['emb'],  points/13000, axis=1)
-
+        totalis=-1
         if tool == 'mclust':
            #values=clustering(adata, 7, radius=radius, method=tool, refinement=True) # For DLPFC dataset, we use optional refinement step.
-           values = clustering(adata, n_clusters, radius=radius, method=tool, refinement=True)
+           values,totalis = clustering(adata, n_clusters, radius=radius, method=tool, refinement=True)
         elif tool in ['leiden', 'louvain']:
            clustering(adata, n_clusters, radius=radius, method=tool, start=0.1, end=2.0, increment=0.01, refinement=False)
 
@@ -451,7 +451,7 @@ def FACT(database):
             aws = ch.compute_ASW(adata, 'domain')
             print(ARI)
 
-            typess=typess+i+','+str(ARI)+','+str(nmi)+','+str(hom)+','+str(cm)+','+str(chaos)+','+str(pas)+','+str(aws)+','+str(during_time)+','+str(memory)+','+str(moranI)+','+str(gearyC)+'\n'
+            typess=typess+i+','+str(ARI)+','+str(nmi)+','+str(hom)+','+str(cm)+','+str(chaos)+','+str(pas)+','+str(aws)+','+str(during_time)+','+str(memory)+','+str(moranI)+','+str(gearyC)+','+str(totalis)+'\n'
 
         else:
             typess = typess + i + ',' + str("TBD") + ',' + str("TBD") + ',' + str("TBD") + ',' + str("TBD") + ',' + str(
@@ -463,7 +463,15 @@ def FACT(database):
         # sc.pl.spatial(adata,
         #               img_key="hires",
         #               color=["ground_truth", "domain"],
-        #               title=["Ground truth", "ARI=%.4f"%ARI],
+        #               title=["Ground truth "+"("+i+")", "FACT "+"("+i+")"],
         #               show=True)
+        sc.pl.spatial(
+            adata,
+            img_key="hires",
+            color=["ground_truth", "domain"],
+            title=[f"Ground truth ({i})", f"FACT ({i})"],
+            show=False,
+            save=f"_{i}_GT_vs_FACT.png"
+        )
 
     print(typess)
